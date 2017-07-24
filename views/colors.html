@@ -1,0 +1,78 @@
+<style>
+    header {
+        display: none;
+    }
+
+    section {
+        float: none;
+        clear: both;
+        margin: 100px;
+    }
+
+    section > img {
+        width: 128px;
+        height: 128px;
+        display: block;
+        float: left;
+        margin-right: 50px;
+    }
+
+    ul.swatches {
+        float: left;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    ul.swatches > li {
+        display: block;
+        float: none;
+        clear: both;
+    }
+
+    .swatch {
+        width: 40px;
+        height: 40px;        
+        float: left;
+        margin-right: 20px;
+    }
+    .swatch-label {
+        width: 1000px;
+        height: 40px;
+        float: left;
+        line-height: 40px;
+    }
+</style>
+
+{{#each apps}}
+<section>
+    <img src='/images/apps/{{this.icon128}}'>
+    <ul class="swatches">
+        <li>
+            <div class="swatch" style="background: {{mainColor.hex}}"></div>
+            <div class="swatch-label" style="color: {{mainColor.hex}}">
+                {{mainColor.hex}}
+                saturation: {{mainColor.saturation}}
+                lightness: {{mainColor.lightness}}
+                luminance: {{mainColor.luminance}}
+                distanceFromWhite: {{mainColor.distanceFromWhite}}
+                contrastToWhite: {{mainColor.contrastToWhite}}
+            </div>
+        </li>
+
+        {{#each this.colors}}
+        <li>
+            <div class="swatch" style="background: {{hex}}"></div>
+            <div class="swatch-label" style="color: {{hex}}">
+                {{hex}}
+                saturation: {{saturation}}
+                lightness: {{lightness}}
+                luminance: {{luminance}}
+                distanceFromWhite: {{distanceFromWhite}}
+                contrastToWhite: {{contrastToWhite}}
+            </div>
+        </li>
+        {{/each}}
+    </ul>
+</section>
+{{/each}}

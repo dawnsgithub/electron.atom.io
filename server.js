@@ -4,6 +4,7 @@ const express = require('express')
 const hbs = require('express-hbs')
 const i18n = require('electron-i18n')
 const slashes = require('connect-slashes')
+const chroma = require('chroma-js')
 const browsersync = require('./lib/browsersync')()
 const electronApps = require('./data/apps.json')
 const sass = require('./lib/sass')()
@@ -43,6 +44,45 @@ app.get('/docs/api/:slug', (req, res) => {
   res.render('api', context)
 })
 
+app.get('/colors', (req, res) => {
+  function round (number) {
+    return Math.round(number * 100) / 100
+  }
+
+  function stats (hex) {
+    const color = chroma(hex)
+    return {
+      hex: hex,
+      hue: round(color.get('hsl.h')),
+      saturation: round(color.get('hsl.s')),
+      lightness: round(color.get('hsl.l')),
+      value: round(color.get('hsv.v')),
+      luminance: round(color.luminance()),
+      distanceFromWhite: parseInt(chroma.distance('#fff', hex)),
+      contrastToWhite: parseInt(chroma.contrast('#fff', hex)),
+    }
+  }
+
+  const apps = electronApps.apps.map(app => {
+    app.colors = app.iconColors.map(hex => stats(hex))
+    // .sort((a,b) => a.lightness - b.lightness)
+    .sort((a,b) => b.saturation - a.saturation)
+    
+    let mainColor = chroma(app.colors[0].hex)
+    if (mainColor.luminance() > 0.5) {
+      mainColor = mainColor.luminance(0.4).hex()
+    }
+
+    app.mainColor = stats(mainColor)
+
+    return app
+  })
+  const context = {
+    apps: apps
+  }
+  res.render('colors', context)
+})
+
 app.get('/apps', (req, res) => {
   let appList = electronApps
   if (req.query.category) {
@@ -78,6 +118,11 @@ app.get('/app/:slug', (req, res) => {
 
 app.get('/apps/:slug', (req, res) => {
   const app = electronApps.apps.find(app => app.slug === req.params.slug)
+
+  app.rainbow = app.iconColors
+    .map((color, i) => `${color} ${i / (app.iconColors.length - 1) * 100}%`)
+    .join(', ')
+
   const context = {
     app: app,
     pageDetails: {
